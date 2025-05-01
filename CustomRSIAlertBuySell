@@ -8,6 +8,12 @@ input price = close;
 input averageType = AverageType.WILDERS;
 input showBreakoutSignals = no;
 
+def condition = RSI crosses above overBought;
+
+def positionSize = GetQuantity();
+def inPosition = positionSize > 0;
+
+
 def NetChgAvg = MovingAverage(averageType, price - price[1], length);
 def TotChgAvg = MovingAverage(averageType, AbsValue(price - price[1]), length);
 def ChgRatio = if TotChgAvg != 0 then NetChgAvg / TotChgAvg else 0;
@@ -25,4 +31,8 @@ SellSignal.SetDefaultColor(Color.RED);
 SellSignal.SetLineWeight(3);
 
 Alert(RSI crosses below overSold, "RSI at or below "+overSold+" - BUY SIGNAL", Alert.BAR, Sound.Ding);
-Alert(condition = RSI crosses above overBought, text = "RSI at or above " + overBought + " - SELL SIGNAL", "alert type" = Alert.BAR);
+
+Alert(condition, 
+      text = "RSI at or above " + overBought + " - SELL SIGNAL", 
+      alertType = Alert.BAR, 
+      sound = if inPosition then Sound.Ring else Sound.NoSound);

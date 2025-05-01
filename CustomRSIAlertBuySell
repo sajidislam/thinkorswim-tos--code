@@ -7,21 +7,19 @@ input overSold = 25;
 input price = close;
 input averageType = AverageType.WILDERS;
 input showBreakoutSignals = no;
+input alertEnabled = yes;  # Toggle to enable/disable the alerts
 
-def condition = RSI crosses above overBought;
-
-def positionSize = GetQuantity();
-def inPosition = positionSize > 0;
-
-
+# Custom RSI Calculation (Chande Momentum Oscillator)
 def NetChgAvg = MovingAverage(averageType, price - price[1], length);
 def TotChgAvg = MovingAverage(averageType, AbsValue(price - price[1]), length);
 def ChgRatio = if TotChgAvg != 0 then NetChgAvg / TotChgAvg else 0;
 plot RSI = 50 * (ChgRatio + 1);
 
+# Buy and Sell Signal Conditions
 plot BuySignal = if RSI crosses below overSold then overSold else Double.NaN;
 plot SellSignal = if RSI crosses above overBought then overBought else Double.NaN;
 
+# Set visual properties for signals
 BuySignal.SetPaintingStrategy(PaintingStrategy.ARROW_UP);
 BuySignal.SetDefaultColor(Color.GREEN);
 BuySignal.SetLineWeight(3);
@@ -30,9 +28,17 @@ SellSignal.SetPaintingStrategy(PaintingStrategy.ARROW_DOWN);
 SellSignal.SetDefaultColor(Color.RED);
 SellSignal.SetLineWeight(3);
 
-Alert(RSI crosses below overSold, "RSI at or below "+overSold+" - BUY SIGNAL", Alert.BAR, Sound.Ding);
+# Position size check (whether you hold a position)
+def positionSize = GetQuantity();
+def inPosition = positionSize > 0;
 
-Alert(condition, 
-      text = "RSI at or above " + overBought + " - SELL SIGNAL", 
+# Alerts with condition to mute/unmute based on position and alertEnabled toggle
+Alert(alertEnabled and RSI crosses below overSold, 
+      "RSI at or below " + overSold + " - BUY SIGNAL", 
+      Alert.BAR, 
+      Sound.Ding);
+
+Alert(alertEnabled and RSI crosses above overBought, 
+      "RSI at or above " + overBought + " - SELL SIGNAL", 
       alertType = Alert.BAR, 
       sound = if inPosition then Sound.Ring else Sound.NoSound);

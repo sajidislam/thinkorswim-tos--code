@@ -1,0 +1,28 @@
+declare lower;
+
+input length = 14;
+input overBought = 65;
+input overSold = 25;
+
+input price = close;
+input averageType = AverageType.WILDERS;
+input showBreakoutSignals = no;
+
+def NetChgAvg = MovingAverage(averageType, price - price[1], length);
+def TotChgAvg = MovingAverage(averageType, AbsValue(price - price[1]), length);
+def ChgRatio = if TotChgAvg != 0 then NetChgAvg / TotChgAvg else 0;
+plot RSI = 50 * (ChgRatio + 1);
+
+plot BuySignal = if RSI crosses below overSold then overSold else Double.NaN;
+plot SellSignal = if RSI crosses above overBought then overBought else Double.NaN;
+
+BuySignal.SetPaintingStrategy(PaintingStrategy.ARROW_UP);
+BuySignal.SetDefaultColor(Color.GREEN);
+BuySignal.SetLineWeight(3);
+
+SellSignal.SetPaintingStrategy(PaintingStrategy.ARROW_DOWN);
+SellSignal.SetDefaultColor(Color.RED);
+SellSignal.SetLineWeight(3);
+
+Alert(RSI crosses below overSold, "RSI at or below "+overSold+" - BUY SIGNAL", Alert.BAR, Sound.Ding);
+Alert(condition = RSI crosses above overBought, text = "RSI at or above " + overBought + " - SELL SIGNAL", "alert type" = Alert.BAR, sound = Sound.Ring);

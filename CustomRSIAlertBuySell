@@ -25,4 +25,4 @@ SellSignal.SetDefaultColor(Color.RED);
 SellSignal.SetLineWeight(3);
 
 Alert(RSI crosses below overSold, "RSI at or below "+overSold+" - BUY SIGNAL", Alert.BAR, Sound.Ding);
-Alert(condition = RSI crosses above overBought, text = "RSI at or above " + overBought + " - SELL SIGNAL", "alert type" = Alert.BAR, sound = Sound.Ring);
+Alert(condition = RSI crosses above overBought, text = "RSI at or above " + overBought + " - SELL SIGNAL", "alert type" = Alert.BAR);
